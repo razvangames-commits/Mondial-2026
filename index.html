@@ -438,6 +438,14 @@
   .ntag.note{background:var(--panel2);color:var(--mut);border:1px solid var(--line2)}
   .ntx{flex:1;min-width:0;font-size:12.5px;color:var(--chalk);line-height:1.5}
   @media(max-width:380px){.newsbtn .verlab{display:none}}
+  /* ===== pronostic pe card (Panou) ===== */
+  .match .scwrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}
+  .ppred{font-family:"JetBrains Mono";font-size:9px;line-height:1;color:var(--mut2);white-space:nowrap;letter-spacing:.01em}
+  .ppred.pp-ok{color:rgba(51,214,155,.7)}
+  .ppred.pp-exact{color:rgba(51,214,155,.95)}
+  .ppred.pp-no{color:rgba(255,84,104,.6)}
+  .hpred{margin-top:5px}
+  .hpred .ppred{font-size:10px}
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   }
@@ -456,7 +464,7 @@
       <span id="srcPill" class="src-pill"><span class="dot"></span><span id="srcTxt">se încarcă…</span></span>
     </div>
     <span class="clock mono" id="clock"></span>
-    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.4</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
+    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.5</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
     <button class="gear" id="gearBtn" aria-label="Setări" data-ic="settings"></button>
   </div>
   <nav class="tabs" id="tabs">
@@ -608,11 +616,25 @@ function statChip(s){
   const map={upcoming:["up","urmează"],live:["live","în direct"],done:["done","final"],await:["await","scor curând"]};
   const x=map[s]||map.upcoming;return '<span class="stat '+x[0]+'">'+x[1]+'</span>';
 }
-function matchRow(m,fav,showDate){
+function predForMatchMini(m){
+  if(!m||!m.g)return "";
+  var p=null;for(var i=0;i<PRED.length;i++){var q=PRED[i];
+    if((q.t1===m.t1&&q.t2===m.t2)||(q.t1===m.t2&&q.t2===m.t1)){p=q;break;}}
+  if(!p)return "";
+  var s1,s2;if(p.t1===m.t1){s1=p.s1;s2=p.s2;}else{s1=p.s2;s2=p.s1;}
+  var cls="";
+  if(m.status==="done"&&hasScore(m.raw)){var a1=+m.s1,a2=+m.s2;
+    var ok=Math.sign(s1-s2)===Math.sign(a1-a2),ex=(s1===a1&&s2===a2);
+    cls=ex?" pp-exact":(ok?" pp-ok":" pp-no");}
+  return '<span class="ppred'+cls+'" title="predicția ta">pred. '+s1+'–'+s2+'</span>';
+}
+function matchRow(m,fav,showDate,showPred){
   const col=m.g?GCOL[m.g]:"#c6ff3a";
   const isFav=fav&&(fav.includes(m.t1)||fav.includes(m.t2));
   const sc=(m.status==="done")?scoreHTML(m):'<span class="when mono">'+m.time+'</span>';
-  const left=showDate?('<span class="when2"><span class="wd mono">'+roShort(m.key)+'</span>'+sc+'</span>'):sc;
+  const core=showDate?('<span class="when2"><span class="wd mono">'+roShort(m.key)+'</span>'+sc+'</span>'):sc;
+  const pm=showPred?predForMatchMini(m):"";
+  const left=pm?('<span class="scwrap">'+core+pm+'</span>'):core;
   const ginfo=m.g?('<span class="g">Gr. '+m.g+'</span>'):('<span class="g">'+roundShort(m.round)+'</span>');
   const clickable=(m.status==="done"&&m.raw&&m.raw.eid);
   return '<div class="match'+(isFav?' fav':'')+(clickable?' tapp':'')+'"'+(clickable?' data-eid="'+m.raw.eid+'" role="button" tabindex="0"':'')+'><div class="stripe" style="background:'+col+'"></div>'+
@@ -663,7 +685,7 @@ function renderPanou(){
         ? '<div class="lsc">'+m.s1+'–'+m.s2+'</div><div class="gr">'+_clk+' · '+_grp+'</div>'
         : '<div class="lmin">'+_clk+'</div><div class="gr">'+_grp+' · de la '+m.time+'</div>';
       h+='<div class="row lrow"><div class="side">'+flagInner(m.t1)+'<span class="tn">'+teamName(m.t1)+'</span></div>'+
-        '<div class="mid">'+mid+'</div>'+
+        '<div class="mid">'+mid+(predForMatchMini(m)?'<div class="hpred">'+predForMatchMini(m)+'</div>':'')+'</div>'+
         '<div class="side">'+flagInner(m.t2)+'<span class="tn">'+teamName(m.t2)+'</span></div></div>';
     });
     h+='<div class="vn">'+icon("map-pin",13)+' '+(live.length>1?(live.length+" meciuri în desfășurare simultan"):live[0].ground)+'</div>'+
@@ -675,7 +697,7 @@ function renderPanou(){
       '<div class="row"><div class="side"><span class="fl">'+flagInner(next.t1)+'</span>'+
         '<span class="tn">'+teamName(next.t1)+'</span></div>'+
       '<div class="mid"><div class="ko">'+next.time+'</div><div class="gr">'+
-        (next.g?("Grupa "+next.g):roundShort(next.round))+' · '+roLong(next.key)+'</div></div>'+
+        (next.g?("Grupa "+next.g):roundShort(next.round))+' · '+roLong(next.key)+'</div>'+(predForMatchMini(next)?'<div class="hpred">'+predForMatchMini(next)+'</div>':'')+'</div>'+
       '<div class="side"><span class="fl">'+flagInner(next.t2)+'</span>'+
         '<span class="tn">'+teamName(next.t2)+'</span></div></div>'+
       '<div class="vn">'+icon("map-pin",13)+' '+next.ground+'</div></div>';
@@ -698,13 +720,13 @@ function renderPanou(){
   // today
   const today=M.filter(m=>m.key===tk);
   h+='<div class="secgap"><div class="lab"><span class="ic">'+icon("clock")+'</span>Meciurile zilei <span class="cnt">'+roLong(tk)+' · '+today.length+'</span></div>';
-  h+=today.length?('<div class="matches">'+today.map(m=>matchRow(m,fav)).join("")+'</div>'):'<div class="empty">Azi nu sunt meciuri programate.</div>';
+  h+=today.length?('<div class="matches">'+today.map(m=>matchRow(m,fav,false,true)).join("")+'</div>'):'<div class="empty">Azi nu sunt meciuri programate.</div>';
   h+='</div>';
 
   // tomorrow
   const tom=M.filter(m=>m.key===mk);
   h+='<div class="secgap"><div class="lab"><span class="ic">'+icon("arrow-right")+'</span>Mâine <span class="cnt">'+roLong(mk)+' · '+tom.length+'</span></div>';
-  h+=tom.length?('<div class="matches">'+tom.map(m=>matchRow(m,fav)).join("")+'</div>'):'<div class="empty">Mâine nu sunt meciuri.</div>';
+  h+=tom.length?('<div class="matches">'+tom.map(m=>matchRow(m,fav,false,true)).join("")+'</div>'):'<div class="empty">Mâine nu sunt meciuri.</div>';
   h+='</div>';
 
   // results today + yesterday
@@ -712,10 +734,10 @@ function renderPanou(){
   const rToday=M.filter(m=>m.key===tk&&hasScore(m.raw)&&!_inWin.has(m.raw.team1+"|"+m.raw.team2));
   const rY=M.filter(m=>m.key===yk&&hasScore(m.raw));
   h+='<div class="secgap"><div class="lab"><span class="ic">'+icon("check")+'</span>Rezultate · azi</div>';
-  h+=rToday.length?('<div class="matches">'+rToday.map(m=>matchRow(m,fav)).join("")+'</div>'):'<div class="empty">Încă niciun rezultat azi.</div>';
+  h+=rToday.length?('<div class="matches">'+rToday.map(m=>matchRow(m,fav,false,true)).join("")+'</div>'):'<div class="empty">Încă niciun rezultat azi.</div>';
   h+='</div>';
   h+='<div class="secgap"><div class="lab"><span class="ic">'+icon("check")+'</span>Rezultate · ieri <span class="cnt">'+roLong(yk)+'</span></div>';
-  h+=rY.length?('<div class="matches">'+rY.map(m=>matchRow(m,fav)).join("")+'</div>'):'<div class="empty">Nu au fost meciuri jucate ieri (sau scorurile nu sunt încă la sursă).</div>';
+  h+=rY.length?('<div class="matches">'+rY.map(m=>matchRow(m,fav,false,true)).join("")+'</div>'):'<div class="empty">Nu au fost meciuri jucate ieri (sau scorurile nu sunt încă la sursă).</div>';
   h+='</div>';
 
   document.getElementById("v-panou").innerHTML=h;
@@ -1191,8 +1213,12 @@ function renderElim(){
 }
 
 /* ================= NOUTĂȚI (jurnal de versiuni) ================= */
-const APP_VER="v1.4";
+const APP_VER="v1.5";
 const CHANGELOG=[
+ {v:"v1.5",d:"22 iun 2026",t:"Pronosticul tău pe meciurile din Panou",items:[
+   ["new","Pe fiecare meci din Panou apare discret, sub scor, pronosticul tău («pred. 2–1») — atât la meciurile care urmează, cât și la cele jucate."],
+   ["new","La meciurile jucate, pronosticul e colorat estompat: verde dacă ai nimerit rezultatul, roșu dacă nu (doar la meciurile din grupe, unde ai pronostic)."]
+ ]},
  {v:"v1.4",d:"22 iun 2026",t:"Jurnal de noutăți",items:[
    ["new","Secțiune «Noutăți» în antet (clopoțelul) cu punct «nou» până o deschizi, plus eticheta versiunii curente lângă ea."],
    ["new","Fiecare update e trecut aici cu versiune, dată și etichete (Nou / Modificat / Reparat), cele mai noi sus."]
