@@ -28,11 +28,18 @@
     --flood:#ffc23a;--flood2:#ffd472;--flood-d:#1a1204;
     --turf:#33d69b;--turf-d:#06231a;
     --live:#ff5468;--info:#5aa6ff;
+    --ice:#46d6e0;--ice2:#7fe6ec;--ice-d:#04181b;
+    --elev1:0 2px 6px -2px rgba(0,0,0,.45);
+    --elev2:0 14px 34px -12px rgba(0,0,0,.6);
+    --hair:inset 0 1px 0 rgba(255,255,255,.045);
   }
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--night);color:var(--chalk);
+  html,body{margin:0;background:
+      radial-gradient(120% 70% at 50% -8%, rgba(70,214,224,.05), transparent 42%),
+      radial-gradient(120% 85% at 50% -16%, rgba(255,194,58,.06), transparent 48%),
+      var(--night);background-attachment:fixed;color:var(--chalk);
     font-family:"Inter",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
-  body{padding-bottom:48px}
+  body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
   .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
   h1,h2,h3{margin:0;font-family:"Inter",sans-serif;font-weight:700;line-height:1.08;letter-spacing:-.01em}
   .anton,.brand .nm,.hero .ko,.modal h2,.daynav .dl{font-family:"Anton",sans-serif;font-weight:400;letter-spacing:.01em}
@@ -62,52 +69,65 @@
   .gear:hover{color:var(--chalk);border-color:var(--flood)}
 
   /* ---- NAV ---- */
-  nav.tabs{max-width:1080px;margin:0 auto;padding:11px 12px 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-  nav.tabs::-webkit-scrollbar{display:none}
-  .tab{flex:none;background:var(--panel);border:1px solid var(--line);color:var(--mut);
-    padding:9px 17px;border-radius:11px;font-size:13.5px;font-weight:600;
-    display:flex;align-items:center;gap:7px;transition:.15s}
-  .tab:hover{color:var(--chalk);border-color:var(--line2)}
-  .tab.active{background:var(--flood);color:var(--flood-d);border-color:var(--flood);box-shadow:0 0 16px rgba(255,194,58,.25)}
-  .tab .ic{font-size:13px;opacity:.85}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:rgba(11,14,23,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);box-shadow:0 -8px 24px -12px rgba(0,0,0,.6);
+    padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar-in{position:relative;display:flex;max-width:560px;margin:0 auto;padding:6px}
+  .tab-ind{position:absolute;top:6px;bottom:6px;left:0;width:0;border-radius:13px;
+    background:rgba(255,194,58,.10);border:1px solid rgba(255,194,58,.22);
+    box-shadow:0 0 18px rgba(255,194,58,.12);pointer-events:none;
+    transition:left .3s cubic-bezier(.22,1,.36,1),width .3s cubic-bezier(.22,1,.36,1)}
+  .tabbar .tab{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;
+    align-items:center;gap:3px;background:none;border:0;color:var(--mut);padding:7px 2px 6px;
+    font-family:"Inter",sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.01em;
+    border-radius:13px;transition:color .2s,transform .15s}
+  .tabbar .tab .ic{display:inline-flex;align-items:center}
+  .tabbar .tab .ic .ic-svg{width:21px;height:21px}
+  .tabbar .tab .tl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .tabbar .tab.active{color:var(--flood)}
+  .tabbar .tab.active .ic{transform:translateY(-1px)}
+  .tabbar .tab:active{transform:scale(.93)}
 
   main{max-width:1080px;margin:0 auto;padding:18px 16px}
   .view{display:none}
   .view.show{display:block;animation:fade .28s ease}
   @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
-  .lab{font-family:"JetBrains Mono";font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--mut);margin:0 0 11px;display:flex;align-items:center;gap:9px}
+  .lab{font-family:"JetBrains Mono";font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--mut);margin:0 0 12px;display:flex;align-items:center;gap:9px}
+  .lab::before{content:"";width:3px;height:13px;border-radius:2px;background:linear-gradient(var(--flood),var(--ice));flex:none}
   .lab .ic{color:var(--flood);font-size:13px}
-  .lab .cnt{color:var(--mut2);letter-spacing:.05em}
-  .secgap{margin-top:26px}
+  .lab .cnt{margin-left:auto;color:var(--mut2);letter-spacing:.05em;font-size:10px}
+  .secgap{margin-top:30px}
 
   /* ---- HERO SCOREBUG (signature) ---- */
   .hero{position:relative;overflow:hidden;margin-bottom:10px;border-radius:20px;padding:20px 18px 22px;
     background:radial-gradient(120% 130% at 50% -25%,rgba(255,194,58,.16),transparent 55%),
       linear-gradient(180deg,#161d2b,#0e131e);
-    border:1px solid var(--line2)}
+    border:1px solid var(--line2);box-shadow:var(--elev2),var(--hair)}
   .hero::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px;
-    background:linear-gradient(90deg,var(--flood),var(--turf))}
+    background:linear-gradient(90deg,var(--flood),var(--ice))}
   .hero .cap{font-family:"JetBrains Mono";font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
     color:var(--flood);font-weight:700}
   .hero .cd{position:absolute;top:18px;right:18px;font-family:"JetBrains Mono";font-weight:700;font-size:13px;
-    color:var(--flood);background:rgba(255,194,58,.08);border:1px solid rgba(255,194,58,.4);
-    border-radius:9px;padding:5px 10px}
+    color:var(--ice);background:rgba(70,214,224,.08);border:1px solid rgba(70,214,224,.4);
+    border-radius:9px;padding:5px 10px;animation:cdPulse 2.4s ease-in-out infinite}
   .hero .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:18px}
   .hero .side{display:flex;flex-direction:column;align-items:center;gap:9px;flex:1;min-width:0}
   .hero .fl{font-size:42px;line-height:1;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5))}
   .hero .tn{font-weight:600;font-size:14.5px;text-align:center;color:var(--chalk)}
   .hero .mid{flex:none;text-align:center;padding:0 8px}
-  .hero .ko{font-size:clamp(40px,11vw,58px);color:var(--chalk);text-shadow:0 0 26px rgba(255,194,58,.45);line-height:.9}
+  .hero .ko{font-size:clamp(40px,11vw,58px);color:var(--chalk);text-shadow:0 0 26px rgba(70,214,224,.4);line-height:.9;animation:koGlow 4s ease-in-out infinite}
   .hero .gr{font-size:11px;color:var(--mut);margin-top:8px;max-width:150px}
   .hero .vn{font-size:11.5px;color:var(--mut);margin-top:16px;text-align:center}
 
   /* ---- MATCH ROWS ---- */
   .matches{display:flex;flex-direction:column;gap:8px}
   .match{display:flex;align-items:stretch;background:var(--panel);border:1px solid var(--line);
-    border-radius:13px;overflow:hidden;min-height:58px;transition:border-color .15s}
-  .match:hover{border-color:var(--line2)}
+    border-radius:13px;overflow:hidden;min-height:58px;box-shadow:var(--elev1),var(--hair);
+    transition:border-color .15s,box-shadow .2s,transform .2s}
+  .match:hover{border-color:var(--line2);box-shadow:var(--elev2),var(--hair);transform:translateY(-1px)}
   .match .stripe{width:4px;flex:none}
   .match .body{flex:1;display:flex;align-items:center;gap:10px;padding:10px 14px;min-width:0;flex-wrap:wrap}
   .match .when{font-family:"JetBrains Mono";font-weight:700;font-size:15px;width:50px;flex:none;text-align:center;color:var(--chalk)}
@@ -137,7 +157,7 @@
     text-align:center;color:var(--mut);font-size:13px;line-height:1.6}
 
   /* ---- FAVORITES ---- */
-  .favcard{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:15px;margin-bottom:10px}
+  .favcard{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:15px;margin-bottom:10px;box-shadow:var(--elev1),var(--hair)}
   .favgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   .favpick{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
   select{background:var(--raise);color:var(--chalk);border:1px solid var(--line2);border-radius:10px;
@@ -257,6 +277,30 @@
   .lhint{font-size:11px;color:var(--mut);margin-top:13px;line-height:1.5;border-top:1px solid var(--line2);padding-top:11px}
   .lhint b{color:var(--flood2)}
   .lrow+.lrow{margin-top:8px;border-top:1px dashed var(--line2);padding-top:12px}
+  .lmatch+.lmatch{margin-top:12px;border-top:1px dashed var(--line2);padding-top:14px}
+  .lprog{position:relative;height:4px;border-radius:3px;background:rgba(255,255,255,.07);margin-top:11px;overflow:hidden}
+  .lprog>i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;width:2%;
+    background:linear-gradient(90deg,var(--flood),var(--live));box-shadow:0 0 10px rgba(255,84,104,.45);
+    transition:width .6s cubic-bezier(.22,1,.36,1)}
+  .lprog.indet>i{width:34%;animation:lprogIndet 1.6s ease-in-out infinite}
+  @keyframes lprogIndet{0%{left:-34%}100%{left:100%}}
+  .lsc.flash{animation:scoreFlash 1s cubic-bezier(.22,1,.36,1)}
+  @keyframes scoreFlash{0%{transform:scale(1);color:var(--flood)}
+    18%{transform:scale(1.22);color:#fff;text-shadow:0 0 22px rgba(255,194,58,.9)}
+    100%{transform:scale(1);color:var(--flood)}}
+  @keyframes cdPulse{0%,100%{box-shadow:0 0 0 0 rgba(70,214,224,0)}50%{box-shadow:0 0 14px 0 rgba(70,214,224,.32)}}
+  @keyframes koGlow{0%,100%{text-shadow:0 0 26px rgba(70,214,224,.4)}50%{text-shadow:0 0 36px rgba(70,214,224,.62)}}
+  @keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+  .view.show>*{animation:rise .42s cubic-bezier(.22,1,.36,1) both}
+  .view.show>*:nth-child(1){animation-delay:.01s}
+  .view.show>*:nth-child(2){animation-delay:.05s}
+  .view.show>*:nth-child(3){animation-delay:.09s}
+  .view.show>*:nth-child(4){animation-delay:.13s}
+  .view.show>*:nth-child(5){animation-delay:.17s}
+  .view.show>*:nth-child(6){animation-delay:.21s}
+  .view.show>*:nth-child(7){animation-delay:.25s}
+  .view.show>*:nth-child(n+8){animation-delay:.28s}
+  @keyframes dwrapIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
   .gdot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:8px;vertical-align:middle}
   .predstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
   .pstat{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px 6px;text-align:center}
@@ -316,7 +360,7 @@
   /* ===== DASHBOARD OVERLAY ===== */
   .dash{position:fixed;inset:0;z-index:90;background:rgba(4,6,11,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
   .dash[hidden]{display:none}
-  .dwrap{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--night);max-width:820px;margin:0 auto;box-shadow:0 0 50px rgba(0,0,0,.55)}
+  .dwrap{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--night);max-width:820px;margin:0 auto;box-shadow:0 0 50px rgba(0,0,0,.55);animation:dwrapIn .34s cubic-bezier(.22,1,.36,1) both}
   .dhead{flex:none;display:flex;align-items:center;gap:11px;padding:11px 13px;border-bottom:1px solid var(--line);background:var(--panel)}
   .dclose{display:inline-flex;align-items:center;gap:3px;background:var(--panel2);border:1px solid var(--line2);color:var(--chalk);border-radius:9px;padding:7px 11px 7px 8px;font-size:13px;font-weight:600;cursor:pointer;flex:none}
   .dclose:hover{border-color:var(--flood2)}
@@ -328,7 +372,7 @@
   .dtab.on{background:var(--flood);border-color:var(--flood);color:#1a1205}
   .dpane{display:none}.dpane.on{display:block;animation:fadein .18s ease}
   @keyframes fadein{from{opacity:.3}to{opacity:1}}
-  .dmh{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+  .dmh{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:var(--elev1),var(--hair)}
   .dmh .sc{display:flex;align-items:center;justify-content:center;gap:12px}
   .dmh .tcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;text-align:center}
   .dmh .tcol .fl{font-size:34px;line-height:1}
@@ -398,7 +442,7 @@
   .predbanner svg{color:var(--flood);flex:none;margin-top:1px}
   .predbanner b{color:var(--chalk)}
   .ksub{font-family:"JetBrains Mono";font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:6px 0 9px}
-  .kcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:9px}
+  .kcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:9px;box-shadow:var(--elev1),var(--hair)}
   .kcard.tapp{cursor:pointer}.kcard.tapp:hover{border-color:var(--flood2)}.kcard.tapp:active{transform:scale(.997)}
   .kmeta{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mut2);margin-bottom:7px}
   .kmeta .kmn{margin-left:auto;font-family:"JetBrains Mono"}
@@ -441,11 +485,17 @@
   /* ===== pronostic pe card (Panou) ===== */
   .match .scwrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}
   .ppred{font-family:"JetBrains Mono";font-size:9px;line-height:1;color:var(--mut2);white-space:nowrap;letter-spacing:.01em}
-  .ppred.pp-ok{color:rgba(51,214,155,.7)}
-  .ppred.pp-exact{color:rgba(51,214,155,.95)}
-  .ppred.pp-no{color:rgba(255,84,104,.6)}
+  .ppred.pp-ok{color:rgba(255,159,64,.95)}
+  .ppred.pp-exact{color:rgba(51,214,155,.85)}
+  .ppred.pp-no{color:rgba(255,90,104,.8)}
   .hpred{margin-top:5px}
   .hpred .ppred{font-size:10px}
+  /* ===== focus accesibil (doar la tastatură) ===== */
+  *:focus{outline:none}
+  .tab:focus-visible,.gear:focus-visible,.newsbtn:focus-visible,.refresh:focus-visible,.dclose:focus-visible,
+  .dtab:focus-visible,.elpill:focus-visible,select:focus-visible,button:focus-visible,
+  [role="button"]:focus-visible,[tabindex]:focus-visible,a:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
+  .match.tapp:focus-visible,.kcard.tapp:focus-visible,.st td.l.tapp:focus-visible{outline:2px solid var(--flood);outline-offset:-2px}
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   }
@@ -464,36 +514,40 @@
       <span id="srcPill" class="src-pill"><span class="dot"></span><span id="srcTxt">se încarcă…</span></span>
     </div>
     <span class="clock mono" id="clock"></span>
-    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.5</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
+    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.6</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
     <button class="gear" id="gearBtn" aria-label="Setări" data-ic="settings"></button>
   </div>
-  <nav class="tabs" id="tabs">
-    <button class="tab active" data-v="panou"><span class="ic" data-ic="layout-dashboard"></span>Panou</button>
-    <button class="tab" data-v="program"><span class="ic" data-ic="calendar-days"></span>Program</button>
-    <button class="tab" data-v="grupe"><span class="ic" data-ic="table"></span>Grupe</button>
-    <button class="tab" data-v="elim"><span class="ic" data-ic="trophy"></span>Eliminatorii</button>
-    <button class="tab" data-v="stats"><span class="ic" data-ic="chart-column"></span>Statistici</button>
-    <button class="tab" data-v="predictii"><span class="ic" data-ic="target"></span>Predicții</button>
-  </nav>
 </div>
 
 <main>
-  <section class="view show" id="v-panou"></section>
-  <section class="view" id="v-program"></section>
-  <section class="view" id="v-grupe"></section>
-  <section class="view" id="v-elim"></section>
-  <section class="view" id="v-stats"></section>
-  <section class="view" id="v-predictii"></section>
+  <section class="view show" id="v-panou" role="tabpanel" aria-labelledby="tab-panou" tabindex="-1"></section>
+  <section class="view" id="v-program" role="tabpanel" aria-labelledby="tab-program" tabindex="-1"></section>
+  <section class="view" id="v-grupe" role="tabpanel" aria-labelledby="tab-grupe" tabindex="-1"></section>
+  <section class="view" id="v-elim" role="tabpanel" aria-labelledby="tab-elim" tabindex="-1"></section>
+  <section class="view" id="v-stats" role="tabpanel" aria-labelledby="tab-stats" tabindex="-1"></section>
+  <section class="view" id="v-predictii" role="tabpanel" aria-labelledby="tab-predictii" tabindex="-1"></section>
 </main>
 
 <footer>
   <b>Mondial 2026 · Live Tracker</b> — orele sunt convertite automat la ora României (Europe/Bucharest). Datele provin din setul public <b>openfootball</b> (domeniu public, fără cheie), servit prin jsDelivr; dacă nu există conexiune, aplicația folosește copia încorporată. Rezultatele se actualizează de la sursă aproximativ o dată pe zi, nu minut-cu-minut. Clasamentele sunt calculate automat din rezultate. Aplicație de sine stătătoare pentru uz casnic.
 </footer>
 
+<nav class="tabbar" id="tabs" role="tablist" aria-label="Secțiuni">
+  <div class="tabbar-in">
+    <span class="tab-ind" id="tabInd" aria-hidden="true"></span>
+    <button class="tab active" data-v="panou" role="tab" id="tab-panou" aria-controls="v-panou" aria-selected="true" tabindex="0"><span class="ic" data-ic="layout-dashboard"></span><span class="tl">Panou</span></button>
+    <button class="tab" data-v="program" role="tab" id="tab-program" aria-controls="v-program" aria-selected="false" tabindex="-1"><span class="ic" data-ic="calendar-days"></span><span class="tl">Program</span></button>
+    <button class="tab" data-v="grupe" role="tab" id="tab-grupe" aria-controls="v-grupe" aria-selected="false" tabindex="-1"><span class="ic" data-ic="table"></span><span class="tl">Grupe</span></button>
+    <button class="tab" data-v="elim" role="tab" id="tab-elim" aria-controls="v-elim" aria-selected="false" tabindex="-1"><span class="ic" data-ic="trophy"></span><span class="tl">Tablou</span></button>
+    <button class="tab" data-v="stats" role="tab" id="tab-stats" aria-controls="v-stats" aria-selected="false" tabindex="-1"><span class="ic" data-ic="chart-column"></span><span class="tl">Statistici</span></button>
+    <button class="tab" data-v="predictii" role="tab" id="tab-predictii" aria-controls="v-predictii" aria-selected="false" tabindex="-1"><span class="ic" data-ic="target"></span><span class="tl">Predicții</span></button>
+  </div>
+</nav>
+
 <div class="overlay" id="overlay">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setTitle">
     <button class="mx" id="closeSet" aria-label="Închide" data-ic="x"></button>
-    <h2>Setări</h2>
+    <h2 id="setTitle">Setări</h2>
     <div class="gl" style="margin-top:6px">Alege 2 echipe favorite — apar primele pe Panou.</div>
     <div class="grp">
       <div class="gl">Favorita 1</div>
@@ -681,12 +735,21 @@ function renderPanou(){
     live.forEach(function(m){
       const _grp=(m.g?("Grupa "+m.g):roundShort(m.round));
       const _clk=m.raw.clock||"ÎN DIRECT";
-      const mid=hasScore(m.raw)
-        ? '<div class="lsc">'+m.s1+'–'+m.s2+'</div><div class="gr">'+_clk+' · '+_grp+'</div>'
-        : '<div class="lmin">'+_clk+'</div><div class="gr">'+_grp+' · de la '+m.time+'</div>';
-      h+='<div class="row lrow"><div class="side">'+flagInner(m.t1)+'<span class="tn">'+teamName(m.t1)+'</span></div>'+
+      var mid;
+      if(hasScore(m.raw)){
+        var _key=(m.raw.team1||m.t1)+"|"+(m.raw.team2||m.t2);
+        var _cur=m.s1+"–"+m.s2;
+        var _fl=(_prevScores[_key]!==undefined&&_prevScores[_key]!==_cur)?" flash":"";
+        _prevScores[_key]=_cur;
+        mid='<div class="lsc'+_fl+'">'+m.s1+'–'+m.s2+'</div><div class="gr">'+_clk+' · '+_grp+'</div>';
+      }else{
+        mid='<div class="lmin">'+_clk+'</div><div class="gr">'+_grp+' · de la '+m.time+'</div>';
+      }
+      var _pct=liveMinutePct(_clk);
+      var _prog=(_pct===null)?'<div class="lprog indet"><i></i></div>':'<div class="lprog"><i style="width:'+_pct+'%"></i></div>';
+      h+='<div class="lmatch"><div class="row lrow"><div class="side">'+flagInner(m.t1)+'<span class="tn">'+teamName(m.t1)+'</span></div>'+
         '<div class="mid">'+mid+(predForMatchMini(m)?'<div class="hpred">'+predForMatchMini(m)+'</div>':'')+'</div>'+
-        '<div class="side">'+flagInner(m.t2)+'<span class="tn">'+teamName(m.t2)+'</span></div></div>';
+        '<div class="side">'+flagInner(m.t2)+'<span class="tn">'+teamName(m.t2)+'</span></div></div>'+_prog+'</div>';
     });
     h+='<div class="vn">'+icon("map-pin",13)+' '+(live.length>1?(live.length+" meciuri în desfășurare simultan"):live[0].ground)+'</div>'+
       '<div class="lhint">'+(SOURCE==="espn"?'Scor live via <b>ESPN</b> (sursă neoficială). Apasă <b>Reîmprospătează</b> pentru a actualiza scorul.':'Scorul live nu e oferit de sursa curentă. Apasă <b>Reîmprospătează</b> — scorul apare după ce sursa îl publică (de regulă la final).')+'</div></div>';
@@ -832,7 +895,7 @@ function renderGrupe(){
       '<table class="st"><tr><th class="l">Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>GD</th><th>Pct</th></tr>';
     rows.forEach((r,i)=>{const cls=i===0?"q1":i===1?"q2":i===2?"q3":"";
       const gd=(r.GF-r.GA);
-      h+='<tr class="'+cls+'"><td class="l tapp" data-tdash="'+r.t+'"><span class="pos">'+(i+1)+'</span><span class="fl">'+flagInner(r.t)+'</span>'+teamName(r.t)+'<span class="tapc">'+icon("chevron-right",13)+'</span></td>'+
+      h+='<tr class="'+cls+'"><td class="l tapp" data-tdash="'+r.t+'" role="button" tabindex="0" aria-label="Vezi dashboard-ul echipei '+teamName(r.t)+'"><span class="pos">'+(i+1)+'</span><span class="fl">'+flagInner(r.t)+'</span>'+teamName(r.t)+'<span class="tapc">'+icon("chevron-right",13)+'</span></td>'+
         '<td>'+r.P+'</td><td>'+r.W+'</td><td>'+r.D+'</td><td>'+r.L+'</td><td>'+(gd>0?"+":"")+gd+'</td><td class="pts">'+r.Pts+'</td></tr>';});
     h+='</table></div>';
   });
@@ -941,7 +1004,7 @@ function renderPredictii(){
 /* ================= DASHBOARDS (meci & echipă) ================= */
 const ESPN_BASE="https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world";
 const MSTATS=[["possessionPct","Posesie",1],["totalShots","Șuturi",0],["shotsOnTarget","Pe poartă",0],["wonCorners","Cornere",0],["foulsCommitted","Faulturi",0],["offsides","Ofsaiduri",0],["totalOffsides","Ofsaiduri",0],["saves","Parade",0],["totalPasses","Pase",0],["accuratePasses","Pase reușite",0],["passPct","Precizie pase",1],["yellowCards","Cartonașe galbene",0],["redCards","Cartonașe roșii",0]];
-let _dashEl=null,_dashTab=0,_dashHistory=false;
+let _dashEl=null,_dashTab=0,_dashHistory=false,_dashReturnFocus=null;
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];});}
 function fmtN(v){if(v==null)return "–";var r=Math.round(v*10)/10;return r%1===0?String(Math.round(r)):String(r);}
 function fetchT(u,ms){ms=ms||9000;if(typeof AbortController==="undefined")return fetch(u,{cache:"no-store"});
@@ -950,21 +1013,33 @@ function fetchT(u,ms){ms=ms||9000;if(typeof AbortController==="undefined")return
 function dLoading(t){return '<div class="dload">'+icon("refresh-cw",16)+' '+esc(t||"se încarcă…")+'</div>';}
 function dErr(t){return '<div class="dempty">'+esc(t)+'</div>';}
 function dashRoot(){if(_dashEl)return _dashEl;_dashEl=document.createElement("div");_dashEl.id="dash";_dashEl.className="dash";_dashEl.hidden=true;
+  _dashEl.setAttribute("role","dialog");_dashEl.setAttribute("aria-modal","true");_dashEl.tabIndex=-1;
   _dashEl.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest("[data-dtab]");if(c){_dashSwitch(c.dataset.dtab);}});
+  _dashEl.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){e.preventDefault();closeDash();return;}
+    if(e.key!=="Tab")return;
+    var f=[].slice.call(_dashEl.querySelectorAll('button,select,textarea,input,a[href],[tabindex]:not([tabindex="-1"])')).filter(function(el){return !el.disabled&&el.offsetParent!==null;});
+    if(!f.length)return;var first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  });
   document.body.appendChild(_dashEl);return _dashEl;}
 function _dashSwitch(i){var r=dashRoot();_dashTab=+i;
-  var ts=r.querySelectorAll(".dtab");for(var a=0;a<ts.length;a++)ts[a].classList.toggle("on",ts[a].dataset.dtab==i);
+  var ts=r.querySelectorAll(".dtab");for(var a=0;a<ts.length;a++){var on=ts[a].dataset.dtab==i;ts[a].classList.toggle("on",on);ts[a].setAttribute("aria-selected",on?"true":"false");}
   var ps=r.querySelectorAll(".dpane");for(var b=0;b<ps.length;b++)ps[b].classList.toggle("on",ps[b].dataset.dpane==i);}
 function openDash(title,bodyHTML){var r=dashRoot();
+  if(!_dashHistory){_dashReturnFocus=(document.activeElement&&document.activeElement.focus)?document.activeElement:null;}
+  r.setAttribute("aria-label",title||"Detalii");
   r.innerHTML='<div class="dwrap"><div class="dhead"><button class="dclose" id="dCloseBtn">'+icon("chevron-left",18)+' Înapoi</button><div class="dttl">'+esc(title)+'</div></div><div class="dbody" id="dBody">'+bodyHTML+'</div></div>';
   r.hidden=false;document.body.style.overflow="hidden";
-  var cb=r.querySelector("#dCloseBtn");if(cb)cb.onclick=closeDash;
+  var cb=r.querySelector("#dCloseBtn");if(cb){cb.onclick=closeDash;try{cb.focus();}catch(e){}}
   if(!_dashHistory){try{history.pushState({dash:1},"");_dashHistory=true;}catch(e){}}
   var bd=r.querySelector("#dBody");if(bd)bd.scrollTop=0;}
 function setDashBody(html){var b=document.getElementById("dBody");if(b)b.innerHTML=html;}
 function closeDash(){var r=dashRoot();r.hidden=true;document.body.style.overflow="";
-  if(_dashHistory){_dashHistory=false;try{history.back();}catch(e){}}}
-if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("popstate",function(){var r=dashRoot();if(!r.hidden){r.hidden=true;document.body.style.overflow="";_dashHistory=false;}});
+  if(_dashHistory){_dashHistory=false;try{history.back();}catch(e){}}
+  if(_dashReturnFocus){try{_dashReturnFocus.focus();}catch(e){}_dashReturnFocus=null;}}
+if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("popstate",function(){var r=dashRoot();if(!r.hidden){r.hidden=true;document.body.style.overflow="";_dashHistory=false;if(_dashReturnFocus){try{_dashReturnFocus.focus();}catch(e){}_dashReturnFocus=null;}}});
 
 /* ---- match summary parsing ---- */
 function _statVal(team,name){if(!team||!team.statistics)return null;for(var i=0;i<team.statistics.length;i++){var s=team.statistics[i];if(s.name===name){var v=parseFloat(String(s.displayValue!=null?s.displayValue:s.value).replace("%",""));return isNaN(v)?null:v;}}return null;}
@@ -1042,9 +1117,9 @@ function matchDashHTML(m){
     '<div class="tcol"><span class="fl">'+flagInner(m.ai.key)+'</span><span class="nm">'+esc(m.ai.ro)+'</span></div></div>'+
     '<div class="meta">'+(m.status?'<b>'+esc(m.status)+'</b>':"")+(m.stage?' · '+esc(m.stage):"")+(m.venue?'<br>'+esc(m.venue):"")+(m.city?', '+esc(m.city):"")+
       (m.attendance?' · '+Number(m.attendance).toLocaleString("ro-RO")+' spectatori':"")+(m.ref?'<br>arbitru: '+esc(m.ref):"")+'</div>'+_goalsStrip(m)+'</div>';
-  var tabs='<div class="dtabs"><button class="dtab on" data-dtab="0">Statistici</button><button class="dtab" data-dtab="1">Formații</button><button class="dtab" data-dtab="2">Cap-la-cap</button></div>';
+  var tabs='<div class="dtabs" role="tablist" aria-label="Secțiuni meci"><button class="dtab on" role="tab" aria-selected="true" data-dtab="0">Statistici</button><button class="dtab" role="tab" aria-selected="false" data-dtab="1">Formații</button><button class="dtab" role="tab" aria-selected="false" data-dtab="2">Cap-la-cap</button></div>';
   var p0=m.stats.length?('<div class="cmp">'+m.stats.map(function(s){return _bar(s.label,s.h,s.a,s.pct);}).join("")+'</div>'):dErr("ESPN nu a publicat statistici detaliate pentru acest meci.");
-  return hd+tabs+'<div class="dpane on" data-dpane="0">'+p0+'</div><div class="dpane" data-dpane="1">'+_lineupHTML(m)+'</div><div class="dpane" data-dpane="2">'+_h2hHTML(m)+'</div>'+
+  return hd+tabs+'<div class="dpane on" role="tabpanel" data-dpane="0">'+p0+'</div><div class="dpane" role="tabpanel" data-dpane="1">'+_lineupHTML(m)+'</div><div class="dpane" role="tabpanel" data-dpane="2">'+_h2hHTML(m)+'</div>'+
     '<div class="dnote">Sursă: ESPN (neoficial), date publice. Indicatori avansați (xG, hărți de șuturi, rețele de pase) nu sunt disponibili din surse gratuite, deci nu apar aici.</div>';}
 function openMatchDash(eid){openDash("Statistici meci",dLoading("Aduc statisticile oficiale…"));_dashTab=0;
   fetchT(ESPN_BASE+"/summary?event="+encodeURIComponent(eid)).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
@@ -1083,7 +1158,7 @@ function teamDashHTML(m,squad){
   var hd='<div class="dmh team"><div class="thead"><span class="fl">'+flagInner(m.key)+'</span>'+
     '<div class="tmeta"><div class="tnm">'+esc(m.ro)+'</div><div class="tsub">'+(m.group?"Grupa "+esc(m.group)+" · ":"")+m.P+' meciuri jucate</div></div></div>'+
     '<div class="trec">'+_formStr(m.form)+' <span class="recnums"><b>'+m.W+'</b>V·<b>'+m.D+'</b>E·<b>'+m.L+'</b>Î · gol '+m.GF+'–'+m.GA+' · <b>'+m.Pts+'</b> pct</span></div></div>';
-  var tabs='<div class="dtabs"><button class="dtab on" data-dtab="0">Medii</button><button class="dtab" data-dtab="1">Marcatori & lot</button><button class="dtab" data-dtab="2">Formă & adversar</button></div>';
+  var tabs='<div class="dtabs" role="tablist" aria-label="Secțiuni echipă"><button class="dtab on" role="tab" aria-selected="true" data-dtab="0">Medii</button><button class="dtab" role="tab" aria-selected="false" data-dtab="1">Marcatori & lot</button><button class="dtab" role="tab" aria-selected="false" data-dtab="2">Formă & adversar</button></div>';
   // pane 0 averages
   var p0;var t=m.ts;
   if(t&&t.n){var pos=t.posn?t.pos/t.posn:null,sh=t.shn?t.sh/t.shn:null,sot=t.sotn?t.sot/t.sotn:null,cor=t.corn?t.cor/t.corn:null,fl=t.fln?t.fl/t.fln:null,off=t.offn?t.off/t.offn:null;
@@ -1117,7 +1192,7 @@ function teamDashHTML(m,squad){
       _kv("Forma adversarului",_formStr(_teamFormOf(opp)))+
       '<div class="dnote">Cap-la-cap detaliat apare doar pentru meciuri deja jucate (din statisticile fiecărui meci).</div>';}
   else p2+='<div class="dnote">Niciun meci viitor programat pentru această echipă în date.</div>';
-  return hd+tabs+'<div class="dpane on" data-dpane="0">'+p0+'</div><div class="dpane" data-dpane="1">'+p1+'</div><div class="dpane" data-dpane="2">'+p2+'</div>'+
+  return hd+tabs+'<div class="dpane on" role="tabpanel" data-dpane="0">'+p0+'</div><div class="dpane" role="tabpanel" data-dpane="1">'+p1+'</div><div class="dpane" role="tabpanel" data-dpane="2">'+p2+'</div>'+
     '<div class="dnote">Sursă: ESPN (neoficial), date publice. Fără xG/hărți de șuturi (necesită sursă cu cheie plătită).</div>';}
 function openTeamDash(key){var m=buildTeamModelBase(key);openDash(m.title,teamDashHTML(m,null));_dashTab=0;
   var eids=m.playedEids.slice(0,4);
@@ -1131,6 +1206,12 @@ if(typeof document!=="undefined"&&document.addEventListener)document.addEventLis
   if(!e.target.closest)return;
   var md=e.target.closest("[data-eid]");if(md&&md.dataset.eid){openMatchDash(md.dataset.eid);return;}
   var td=e.target.closest("[data-tdash]");if(td&&td.dataset.tdash){openTeamDash(td.dataset.tdash);return;}
+});
+if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" "&&e.key!=="Spacebar")return;
+  if(!e.target.closest)return;
+  var md=e.target.closest("[data-eid][tabindex]");if(md&&md.dataset.eid){e.preventDefault();openMatchDash(md.dataset.eid);return;}
+  var td=e.target.closest("[data-tdash][tabindex]");if(td&&td.dataset.tdash){e.preventDefault();openTeamDash(td.dataset.tdash);return;}
 });
 
 /* ================= ELIMINATORII (tablou) ================= */
@@ -1190,7 +1271,7 @@ function koCard(m){
 }
 function renderElim(){
   var data=buildKO();
-  var pills=_KO_ROUNDS.map(function(r){return '<button class="elpill'+(r.id===_elimPhase?' on':'')+'" data-elph="'+r.id+'">'+r.label+'</button>';}).join("");
+  var pills=_KO_ROUNDS.map(function(r){return '<button class="elpill'+(r.id===_elimPhase?' on':'')+'" role="tab" aria-selected="'+(r.id===_elimPhase?"true":"false")+'" data-elph="'+r.id+'">'+r.label+'</button>';}).join("");
   var panes=_KO_ROUNDS.map(function(r){
     var rounds=[].concat(r.round);
     var ms=data.ko.filter(function(m){return rounds.indexOf(m.round)>=0;}).sort(function(a,b){return ((a.raw&&a.raw.num)||999)-((b.raw&&b.raw.num)||999)||a.kick-b.kick;});
@@ -1202,19 +1283,29 @@ function renderElim(){
         (third.length?'<div class="ksub">Finala mică (locul 3)</div>'+third.map(koCard).join(""):'')+
         '<div class="dnote">Surpriza prezisă: <b>'+esc(PREDX.dark)+'</b> · Balon de Aur prezis: <b>'+esc(PREDX.gball)+'</b></div>';
     } else body=ms.length?ms.map(koCard).join(""):dErr("—");
-    return '<div class="elph'+(r.id===_elimPhase?' on':'')+'" data-elph="'+r.id+'">'+body+'</div>';
+    return '<div class="elph'+(r.id===_elimPhase?' on':'')+'" role="tabpanel" data-elph="'+r.id+'">'+body+'</div>';
   }).join("");
   var note='<div class="dnote">Sloturile se completează automat din rezultatele oficiale pe măsură ce se joacă. '+icon("trophy",11)+'/'+icon("star",11)+' = echipele din predicția ta. Apasă un meci jucat pentru statistici.</div>';
   var root=document.getElementById("v-elim");
-  root.innerHTML='<div class="elpills">'+pills+'</div>'+panes+note;
+  root.innerHTML='<div class="elpills" role="tablist" aria-label="Faze eliminatorii">'+pills+'</div>'+panes+note;
   root.onclick=function(e){var p=e.target.closest&&e.target.closest(".elpill");if(!p)return;_elimPhase=p.dataset.elph;
-    var ps=root.querySelectorAll(".elpill");for(var i=0;i<ps.length;i++)ps[i].classList.toggle("on",ps[i].dataset.elph===_elimPhase);
+    var ps=root.querySelectorAll(".elpill");for(var i=0;i<ps.length;i++){var on=ps[i].dataset.elph===_elimPhase;ps[i].classList.toggle("on",on);ps[i].setAttribute("aria-selected",on?"true":"false");}
     var pn=root.querySelectorAll(".elph");for(var j=0;j<pn.length;j++)pn[j].classList.toggle("on",pn[j].dataset.elph===_elimPhase);};
 }
 
 /* ================= NOUTĂȚI (jurnal de versiuni) ================= */
-const APP_VER="v1.5";
+const APP_VER="v1.6";
 const CHANGELOG=[
+ {v:"v1.6",d:"23 iun 2026",t:"Design rafinat, navigație jos și accesibilitate",items:[
+   ["new","Hero «în desfășurare» viu: bară de progres pentru minutul meciului, scor care pulsează scurt când se schimbă, plus o respirație discretă a cronometrului la meciul următor."],
+   ["new","Mișcare coregrafiată: secțiunile apar etajat, lin, la schimbarea filei, iar panourile (meci/echipă/noutăți) se deschid cu o tranziție de «extindere»."],
+   ["new","Navigație jos, în zona degetului mare, cu indicator care alunecă lin sub tabul activ — mult mai ușor de folosit cu o mână pe telefon."],
+   ["new","Design rafinat: scară tipografică mai clară, accent secundar rece pe lângă amber, elevație/adâncime subtilă și ritm mai aerisit — păstrând identitatea Nocturnă."],
+   ["mod","Pronosticul de pe Panou la meciurile jucate are acum 3 culori: verde = scor exact, portocaliu = doar rezultatul (1x2) corect, roșu = și scorul și 1x2 greșite."],
+   ["new","Setări și ferestre accesibile: se închid cu Escape (Setări și la click pe fundal), focusul rămâne în casetă (Tab) și revine la loc după închidere."],
+   ["new","Navigare cu tastatura: taburile se schimbă cu săgețile, contur de focus vizibil doar la tastatură, iar meciurile/echipele apăsabile răspund și la Enter/Space."],
+   ["new","Roluri ARIA pe taburi, sub-taburi, faze și ferestre, pentru cititoare de ecran."]
+ ]},
  {v:"v1.5",d:"22 iun 2026",t:"Pronosticul tău pe meciurile din Panou",items:[
    ["new","Pe fiecare meci din Panou apare discret, sub scor, pronosticul tău («pred. 2–1») — atât la meciurile care urmează, cât și la cele jucate."],
    ["new","La meciurile jucate, pronosticul e colorat estompat: verde dacă ai nimerit rezultatul, roșu dacă nu (doar la meciurile din grupe, unde ai pronostic)."]
@@ -1255,13 +1346,40 @@ function refreshNewDot(){var d=document.getElementById("newDot");if(!d)return;d.
 function openNews(){openDash("Noutăți",newsHTML());try{store.set("seenver",CHANGELOG[0].v);}catch(e){}refreshNewDot();}
 
 const RENDER={panou:renderPanou,program:renderProgram,grupe:renderGrupe,elim:renderElim,stats:renderStats,predictii:renderPredictii};
+let _prevScores={};
+function liveMinutePct(clk){
+  if(!clk) return null;
+  var s=String(clk).toUpperCase();
+  if(s.indexOf("HT")>=0||s.indexOf("PAUZ")>=0) return 50;
+  if(s.indexOf("FT")>=0||s.indexOf("FINAL")>=0||s.indexOf("ÎNCH")>=0||s.indexOf("INCH")>=0) return 100;
+  var mm=s.match(/(\d+)/);
+  if(!mm) return null;
+  var min=parseInt(mm[1],10);
+  if(isNaN(min)) return null;
+  var pct=Math.round(min/90*100);
+  if(pct>100)pct=100; if(pct<2)pct=2;
+  return pct;
+}
 function show(v){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.v===v));
+  document.querySelectorAll(".tab").forEach(t=>{const on=t.dataset.v===v;t.classList.toggle("active",on);t.setAttribute("aria-selected",on?"true":"false");t.tabIndex=on?0:-1;});
   document.querySelectorAll(".view").forEach(s=>s.classList.remove("show"));
   document.getElementById("v-"+v).classList.add("show");
-  RENDER[v]();window.scrollTo({top:0,behavior:"smooth"});
+  RENDER[v]();moveTabIndicator();window.scrollTo({top:0,behavior:"smooth"});
 }
+function moveTabIndicator(){var bar=document.getElementById("tabs");if(!bar)return;
+  var ind=document.getElementById("tabInd"),a=bar.querySelector(".tab.active");if(!ind||!a)return;
+  ind.style.left=a.offsetLeft+"px";ind.style.width=a.offsetWidth+"px";}
 document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(b)show(b.dataset.v);});
+document.getElementById("tabs").addEventListener("keydown",e=>{
+  const tabs=[].slice.call(document.querySelectorAll("#tabs .tab"));
+  const i=tabs.indexOf(document.activeElement);if(i<0)return;let j=-1;
+  if(e.key==="ArrowRight"||e.key==="ArrowDown")j=(i+1)%tabs.length;
+  else if(e.key==="ArrowLeft"||e.key==="ArrowUp")j=(i-1+tabs.length)%tabs.length;
+  else if(e.key==="Home")j=0;else if(e.key==="End")j=tabs.length-1;
+  if(j>=0){e.preventDefault();tabs[j].focus();show(tabs[j].dataset.v);}
+});
+window.addEventListener("resize",moveTabIndicator);
+window.addEventListener("load",moveTabIndicator);
 
 function fillTeamSelect(sel,val){
   sel.innerHTML='<option value="">— alege —</option>'+
@@ -1269,22 +1387,40 @@ function fillTeamSelect(sel,val){
     .map(n=>'<option value="'+n+'"'+(n===val?' selected':'')+'>'+TEAMS[n].ro+'</option>').join("");
 }
 const overlay=document.getElementById("overlay");
-document.getElementById("gearBtn").onclick=()=>{
+let _setReturnFocus=null;
+function _setTrap(e){
+  if(e.key==="Escape"){e.preventDefault();closeSettings();return;}
+  if(e.key!=="Tab")return;
+  var f=[].slice.call(overlay.querySelectorAll('button,select,textarea,input,a[href],[tabindex]:not([tabindex="-1"])')).filter(function(el){return !el.disabled&&el.offsetParent!==null;});
+  if(!f.length)return;var first=f[0],last=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+}
+function openSettings(){
   const fav=store.get("fav")||["",""];
   fillTeamSelect(document.getElementById("fav1"),fav[0]||"");
   fillTeamSelect(document.getElementById("fav2"),fav[1]||"");
   document.getElementById("setNote").textContent="Sursă date: "+(SOURCE==="live"?"openfootball (online)":"copie încorporată (offline)")+".";
+  _setReturnFocus=(document.activeElement&&document.activeElement.focus)?document.activeElement:null;
   overlay.classList.add("show");
-};
-document.getElementById("closeSet").onclick=()=>overlay.classList.remove("show");
-overlay.onclick=e=>{if(e.target===overlay)overlay.classList.remove("show");};
+  overlay.addEventListener("keydown",_setTrap);
+  var c=document.getElementById("closeSet");if(c){try{c.focus();}catch(e){}}
+}
+function closeSettings(){
+  overlay.classList.remove("show");
+  overlay.removeEventListener("keydown",_setTrap);
+  if(_setReturnFocus){try{_setReturnFocus.focus();}catch(e){}_setReturnFocus=null;}
+}
+document.getElementById("gearBtn").onclick=openSettings;
+document.getElementById("closeSet").onclick=closeSettings;
+overlay.onclick=e=>{if(e.target===overlay)closeSettings();};
 document.getElementById("saveSet").onclick=()=>{
   const a=document.getElementById("fav1").value,b=document.getElementById("fav2").value;
-  store.set("fav",[a,b].filter(Boolean));overlay.classList.remove("show");
+  store.set("fav",[a,b].filter(Boolean));closeSettings();
   show(document.querySelector(".tab.active").dataset.v);
 };
 async function doRefresh(btn){if(btn){btn.disabled=true;btn.innerHTML=icon("refresh-cw",14)+" se actualizează…";}await loadData();enrich();lastSync=Date.now();show(document.querySelector(".tab.active").dataset.v);}
-document.getElementById("refreshBtn").onclick=async()=>{overlay.classList.remove("show");await doRefresh();};
+document.getElementById("refreshBtn").onclick=async()=>{closeSettings();await doRefresh();};
 
 const _nb=document.getElementById("newsBtn");if(_nb)_nb.onclick=openNews;
 const _vl=document.getElementById("verLab");if(_vl)_vl.textContent=APP_VER;
