@@ -585,7 +585,7 @@
       <span id="srcPill" class="src-pill"><span class="dot"></span><span id="srcTxt">se încarcă…</span></span>
     </div>
     <span class="clock mono" id="clock"></span>
-    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.8</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
+    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.9</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
     <button class="gear" id="gearBtn" aria-label="Setări" data-ic="settings"></button>
   </div>
 </div>
@@ -733,8 +733,13 @@ function koTitle(c){
 }
 function scoreHTML(m){
   if(!hasScore(m.raw))return "";
-  let s='<span class="score">'+m.s1+' – '+m.s2+'</span>';
-  if(m.p1!=null&&m.p2!=null)s+=' <span class="pen">('+m.p1+'-'+m.p2+' d.l.d.)</span>';
+  var pen=(m.p1!=null&&m.p2!=null);
+  var big=pen?(m.s1+' ('+m.p1+') – '+m.s2+' ('+m.p2+')'):(m.s1+' – '+m.s2);
+  var tag=pen?' <span class="kotag" style="font-size:.62em;opacity:.6;font-weight:600;letter-spacing:.3px;vertical-align:2px">d.l.d.</span>'
+            :((m.raw&&m.raw.aet)?' <span class="kotag" style="font-size:.62em;opacity:.6;font-weight:600;letter-spacing:.3px;vertical-align:2px">d.p.</span>':'');
+  var s='<span class="score">'+big+'</span>'+tag;
+  if(m.et1!=null&&m.et2!=null&&!(m.et1===m.s1&&m.et2===m.s2))
+    s+='<span class="reg90" style="display:block;font-size:.7em;opacity:.5;margin-top:1px">90&#39;: '+m.et1+'–'+m.et2+'</span>';
   return s;
 }
 function statChip(s){
@@ -742,8 +747,42 @@ function statChip(s){
   const x=map[s]||map.upcoming;return '<span class="stat '+x[0]+'">'+x[1]+'</span>';
 }
 function detailsChip(){return '<span class="dchip" aria-hidden="true">'+icon("info",16)+'</span>';}
+/* ---- knockout predictions (v1.9): qualifier + 90' + final; penalty digits decide ONLY the qualifier, never the score ---- */
+const KOPRED=[
+ {n:73,q:"Canada",s1:1,s2:2,r1:1,r2:1},
+ {n:76,q:"Brazil",s1:2,s2:1,r1:2,r2:1},
+ {n:74,q:"Germany",s1:3,s2:1,r1:3,r2:1},
+ {n:75,q:"Morocco",s1:1,s2:1,r1:1,r2:1},
+ {n:78,q:"Norway",s1:1,s2:2,r1:1,r2:2},
+ {n:77,q:"France",s1:2,s2:0,r1:2,r2:0},
+ {n:79,q:"Mexico",s1:2,s2:1,r1:2,r2:1},
+ {n:80,q:"England",s1:3,s2:0,r1:3,r2:0},
+ {n:82,q:"Belgium",s1:2,s2:1,r1:2,r2:1},
+ {n:81,q:"USA",s1:2,s2:1,r1:2,r2:1},
+ {n:84,q:"Spain",s1:2,s2:0,r1:2,r2:0},
+ {n:83,q:"Portugal",s1:2,s2:1,r1:2,r2:1},
+ {n:85,q:"Switzerland",s1:1,s2:0,r1:1,r2:0},
+ {n:88,q:"Australia",s1:1,s2:1,r1:1,r2:1},
+ {n:86,q:"Argentina",s1:3,s2:0,r1:3,r2:0},
+ {n:87,q:"Colombia",s1:2,s2:1,r1:2,r2:1}
+];
+function _koPredFor(m){if(!m)return null;var n=(m.raw&&m.raw.num!=null)?m.raw.num:m.num;if(n==null)return null;
+  for(var i=0;i<KOPRED.length;i++)if(KOPRED[i].n===n)return KOPRED[i];return null;}
+function _koActualQual(m){if(!m||!hasScore(m.raw))return null;
+  if(+m.s1>+m.s2)return m.t1;if(+m.s2>+m.s1)return m.t2;
+  if(m.p1!=null&&m.p2!=null)return (+m.p1>+m.p2)?m.t1:((+m.p2>+m.p1)?m.t2:null);return null;}
+function predForKnockoutMini(m){
+  var p=_koPredFor(m);if(!p)return "";
+  var cls="";
+  if(m.status==="done"&&hasScore(m.raw)){
+    var aq=_koActualQual(m),qOK=(aq&&aq===p.q),sOK=(+m.s1===p.s1&&+m.s2===p.s2);
+    cls=qOK?(sOK?" pp-exact":" pp-ok"):" pp-no";
+  }
+  return '<span class="ppred'+cls+'" title="predicția mea">pred. '+p.s1+'–'+p.s2+' · '+predName(p.q)+'</span>';
+}
 function predForMatchMini(m){
-  if(!m||!m.g)return "";
+  if(!m)return "";
+  if(!m.g)return predForKnockoutMini(m);
   var p=null;for(var i=0;i<PRED.length;i++){var q=PRED[i];
     if((q.t1===m.t1&&q.t2===m.t2)||(q.t1===m.t2&&q.t2===m.t1)){p=q;break;}}
   if(!p)return "";
@@ -1068,6 +1107,35 @@ function renderPredictii(){
         '<div class="body">'+mark+'<span class="ppair">'+predTeam2(p.t1)+'<span class="psc">'+p.s1+'–'+p.s2+'</span>'+predTeam2(p.t2)+'</span>'+
         '<span class="info">'+actual+'</span></div></div>';});
     h+='</div></div>';});
+  var kok=0,kno=0,kpd=0,keok=0,krows="";
+  KOPRED.forEach(function(p){
+    var m=M.find(function(x){return !x.g&&x.raw&&x.raw.num===p.n;});
+    var t1=m?m.t1:null,t2=m?m.t2:null;
+    var done=(m&&m.status==="done"&&hasScore(m.raw)),mark,info,rcls;
+    if(done){
+      var aq=_koActualQual(m),qOK=(aq&&aq===p.q),sOK=(+m.s1===p.s1&&+m.s2===p.s2);
+      if(qOK){kok++;if(sOK)keok++;}else kno++;
+      rcls=qOK?"ok":"no";
+      mark='<span class="pmark '+(qOK?"ok":"no")+'">'+icon(qOK?"circle-check":"circle-x",18)+'</span>';
+      var penTxt=(m.p1!=null&&m.p2!=null)?(' ('+m.p1+'-'+m.p2+')'):'';
+      info='<span class="pact">real <b>'+m.s1+'–'+m.s2+'</b>'+penTxt+'</span>'+
+        '<span class="echip '+(sOK?"ok":"no")+'">'+icon(sOK?"circle-check":"circle-x",13)+' scor</span>'+
+        '<span class="echip '+(qOK?"ok":"no")+'">'+icon(qOK?"circle-check":"circle-x",13)+' calif.</span>';
+    }else{kpd++;rcls="pending";mark='<span class="pmark pend">'+icon("clock",15)+'</span>';
+      info='<span class="pact pend">în așteptare</span>';}
+    var nm1=t1?predTeam2(t1):predName(p.q),nm2=t2?predTeam2(t2):'';
+    krows+='<div class="match pred '+rcls+'"><div class="stripe" style="background:#8a6dff"></div>'+
+      '<div class="body">'+mark+'<span class="ppair">'+nm1+'<span class="psc">'+p.s1+'–'+p.s2+'</span>'+nm2+'</span>'+
+      '<span class="info">'+info+'</span></div></div>';
+  });
+  var kdone=kok+kno,kqacc=kdone?Math.round(kok/kdone*100):0;
+  h+='<div class="secgap"><div class="lab"><span class="ic">'+icon("trophy")+'</span>16-imi · predicțiile mele</div>'+
+    '<div class="scard predsum"><div class="ptot">'+
+    '<div class="ptrow"><span class="ptlab">Calificate</span><span class="ptnums"><b class="ok">'+kok+'</b> corecte · <b class="no">'+kno+'</b> greșite · <b class="acc">'+(kdone?kqacc+"%":"—")+'</b></span></div>'+
+    '<div class="ptrow"><span class="ptlab">Scor final exact</span><span class="ptnums"><b class="ok">'+keok+'</b> din '+kdone+'</span></div>'+
+    '<div class="ptrow"><span class="ptlab">În așteptare</span><span class="ptnums"><b class="pend">'+kpd+'</b> meciuri</span></div>'+
+    '</div><div class="note2"><b>Verde</b> = calificată + scor final corect · <b>portocaliu</b> = doar calificata · <b>roșu</b> = calificată greșită. Penalty-urile decid doar calificata, nu scorul.</div></div>'+
+    '<div class="matches">'+krows+'</div></div>';
   h+='<div class="secgap"><div class="lab"><span class="ic">'+icon("trophy")+'</span>Predicții de turneu</div><div class="scard">'+
     '<div class="trow"><span>Campioană</span><b>'+predTeam(PREDX.champ)+'</b></div>'+
     '<div class="trow"><span>Finala</span><b>'+predName(PREDX.champ)+' '+PREDX.fin+' '+predName(PREDX.finalist)+'</b></div>'+
@@ -1472,8 +1540,15 @@ function renderElim(){
 }
 
 /* ================= NOUTĂȚI (jurnal de versiuni) ================= */
-const APP_VER="v1.8";
+const APP_VER="v1.9";
 const CHANGELOG=[
+ {v:"v1.9",d:"28 iun 2026",t:"Fazele eliminatorii: tablou live, prelungiri/penalty-uri și predicții",items:[
+   ["new","Fazele eliminatorii se populează automat din datele live ESPN: în 16-imi (și mai departe) apar echipele reale imediat ce sunt cunoscute, în locul codurilor «2A», «Înv. 74» etc. Tabloul și Programul se completează singure pe măsură ce se cunosc rezultatele."],
+   ["new","Rezultatele cu prelungiri și lovituri de departajare se văd corect: scorul mare e cel final, cu eticheta «d.p.» (decis după prelungiri) sau «d.l.d.» (decis din lovituri de departajare), iar penalty-urile apar ca «1 (4) – 1 (2)»."],
+   ["new","Pe meciurile din fazele eliminatorii apare simbolul «detalii» (ⓘ) după final, exact ca la grupe — deschide dashboard-ul meciului (cronologie, formații etc.)."],
+   ["new","Predicțiile mele pentru 16-imi: pe fiecare meci vezi calificata și scorul prezis, iar verdictul colorează scorul — verde (calificată + scor final corect), portocaliu (doar calificata corectă), roșu (calificată greșită). Penalty-urile decid doar calificata, nu scorul. Rezumatul apare și în fila «Predicții»."],
+   ["new","Runda următoare se completează doar când meciul-sursă s-a încheiat oficial (cu tot cu penalty-uri); până atunci adversarul rămâne marcat ca proveniență («Înv. [rundă] [nr]»), fără să ghicim rezultate."]
+ ]},
  {v:"v1.8",d:"25 iun 2026",t:"Corecții și detalii pe Panou",items:[
    ["new","Casetele echipelor favorite din Panou au acum simbolul «detalii» (ⓘ) în antet, lângă nume, și se deschid în dashboard-ul echipei la atingere — exact ca în Grupe. Toată caseta e apăsabilă."],
    ["new","Schimbările apar cu minutul în «Formații», ca jurnal pereche (ieșit ↓ → intrat ↑), și — când datele există — și în «Cronologie», intercalate cu golurile și cartonașele. Sursa e fluxul oficial de evenimente ESPN; dacă un meci nu are schimbări publicate, nu se afișează nimic (nu inventăm date)."],
@@ -1653,6 +1728,53 @@ Object.keys(TEAMS).forEach(k=>{CODE2KEY[TEAMS[k].code]=k;NAME2KEY[_norm(k)]=k;})
 function espnTeamKey(t){if(!t)return null;const k=CODE2KEY[(t.abbreviation||"").toUpperCase()];if(k)return k;
   return NAME2KEY[_norm(t.displayName)]||NAME2KEY[_norm(t.name)]||NAME2KEY[_norm(t.shortDisplayName)]||null;}
 function _pair(a,b){return [a,b].sort().join("__");}
+/* ---- knockout helpers (v1.9) ---- */
+function _koNorm(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z]/g,"");}
+const KO_RE=/Round of 32|Round of 16|Quarter-final|Semi-final|Match for third place|Final/;
+function _isKO(ev,c){var sl=(ev&&ev.season&&ev.season.slug)||"";if(/group/i.test(sl))return false;
+  if(/round-of|quarter|semi|third|final/i.test(sl))return true;
+  var n=(c&&c.altGameNote)||"";return /round of|quarter|semi|third|final/i.test(n)&&!/group/i.test(n);}
+/* Map an ESPN knockout event to a RAW bracket slot by venue-city + nearest date.
+   Date is UTC in ESPN (night games roll to next day), so we match the closest RAW date within 2 days. */
+function _koSlot(base,ev,c){
+  if(!_isKO(ev,c))return null;
+  var city=_koNorm((((c&&c.venue&&c.venue.address&&c.venue.address.city)||"").split(",")[0]));
+  if(!city)return null;
+  var evMs=Date.parse(ev.date);if(isNaN(evMs))return null;
+  var best=null,bestd=1e15;
+  (base.matches||[]).forEach(function(m){
+    if(!m.round||!KO_RE.test(m.round))return;
+    if(_koNorm(m.ground).indexOf(city)<0)return;
+    var rMs=Date.parse((m.date||"")+"T12:00:00Z");if(isNaN(rMs))return;
+    var d=Math.abs(rMs-evMs);if(d<bestd){bestd=d;best=m;}
+  });
+  return (best&&bestd<=2*86400000)?best:null;
+}
+/* Capture extra-time flag + penalty-shootout score (defensive: ESPN field name unverified until a KO game ends). */
+function _koExtra(m,c,H,A,kH){
+  function pen(x){if(!x)return null;var v=(x.shootoutScore!=null?x.shootoutScore:(x.penaltyScore!=null?x.penaltyScore:null));
+    if(v==null)return null;var n=parseInt(v,10);return isNaN(n)?null:n;}
+  var pH=pen(H),pA=pen(A);
+  if(pH!=null&&pA!=null){if(m.team1===kH){m.score1p=pH;m.score2p=pA;}else{m.score1p=pA;m.score2p=pH;}}
+  var sd=((c.status&&c.status.type&&(c.status.type.shortDetail||c.status.type.detail||c.status.type.description))||"")+"";
+  if(/AET|a\.e\.t|extra ?time|prelung/i.test(sd))m.aet=true;
+}
+/* Resolve W##/L## bracket codes to real team keys, but ONLY from officially finished feeders (pens decide ties). */
+function resolveBracket(base){
+  var byNum={};(base.matches||[]).forEach(function(m){if(m.num!=null)byNum[m.num]=m;});
+  function done(m){return m&&m.fin===true&&m.score1!=null&&m.score2!=null;}
+  function winner(m){if(!done(m))return null;
+    if(m.score1>m.score2)return m.team1;if(m.score2>m.score1)return m.team2;
+    if(m.score1p!=null&&m.score2p!=null)return m.score1p>m.score2p?m.team1:(m.score2p>m.score1p?m.team2:null);
+    return null;}
+  function loser(m){var w=winner(m);if(!w)return null;return w===m.team1?m.team2:m.team1;}
+  function code2team(code){var mm=/^W(\d+)$/.exec(code);if(mm)return winner(byNum[+mm[1]]);
+    var ml=/^L(\d+)$/.exec(code);if(ml)return loser(byNum[+ml[1]]);return null;}
+  for(var pass=0;pass<3;pass++){(base.matches||[]).forEach(function(m){
+    var t1=code2team(m.team1);if(t1)m.team1=t1;
+    var t2=code2team(m.team2);if(t2)m.team2=t2;
+  });}
+}
 async function mergeESPN(base){
   const U="https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=400";
   const r=await fetch(U,{cache:"no-store"});if(!r.ok)return false;
@@ -1688,13 +1810,17 @@ async function mergeESPN(base){
         }
       });
     }
-    if(st==="pre")return;
     const H=cs.find(x=>x.homeAway==="home"),A=cs.find(x=>x.homeAway==="away");
     if(!H||!A)return;const kH=espnTeamKey(H.team),kA=espnTeamKey(A.team);if(!kH||!kA)return;
-    const m=idx[_pair(kH,kA)];if(!m)return;
+    var m=_koSlot(base,ev,c);
+    if(m){m.team1=kH;m.team2=kA;m.eid=ev.id;}
+    else m=idx[_pair(kH,kA)];
+    if(!m)return;
+    if(st==="pre")return;
     m.eid=ev.id;
     const sH=parseInt(H.score,10),sA=parseInt(A.score,10);if(isNaN(sH)||isNaN(sA))return;
     if(m.team1===kH){m.score1=sH;m.score2=sA;}else{m.score1=sA;m.score2=sH;}
+    _koExtra(m,c,H,A,kH);
     m.live=(st==="in");m.fin=(st==="post");
     m.clock=(c.status.type&&c.status.type.shortDetail)||c.status.displayClock||"";
     _acc(kH,H,sH,sA);_acc(kA,A,sA,sH);
@@ -1712,6 +1838,7 @@ async function loadData(){
   if(!base)base=JSON.parse(JSON.stringify(RAW));
   let espnOK=false;
   try{espnOK=await mergeESPN(base);}catch(e){espnOK=false;}
+  try{resolveBracket(base);}catch(e){}
   DATA=base;
   setSource(espnOK?"espn":(ofLoaded?"live":"fallback"));
 }
