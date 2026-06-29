@@ -531,6 +531,8 @@
   .kmid .ksc{font-family:"Anton";font-size:17px;color:var(--chalk);letter-spacing:.04em}
   .kmid .kt{font-family:"JetBrains Mono";font-size:12px;color:var(--mut)}
   .kpen{font-size:9.5px;color:var(--flood);border:1px solid var(--line2);border-radius:5px;padding:1px 5px;text-transform:uppercase;letter-spacing:.04em}
+  .kpredchip{padding:0 0 4px 33px}
+  .kpredchip .ppred{font-size:9.5px}
   /* ===== NOUTĂȚI ===== */
   .newsbtn{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line2);color:var(--chalk);border-radius:9px;padding:5px 9px;cursor:pointer;position:relative}
   .newsbtn:hover{border-color:var(--flood)}
@@ -585,7 +587,7 @@
       <span id="srcPill" class="src-pill"><span class="dot"></span><span id="srcTxt">se încarcă…</span></span>
     </div>
     <span class="clock mono" id="clock"></span>
-    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.9</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
+    <button class="newsbtn" id="newsBtn" aria-label="Noutăți"><span class="verlab" id="verLab">v1.9.1</span><span class="bell" data-ic="bell"></span><span class="newdot" id="newDot" hidden></span></button>
     <button class="gear" id="gearBtn" aria-label="Setări" data-ic="settings"></button>
   </div>
 </div>
@@ -779,6 +781,20 @@ function predForKnockoutMini(m){
     cls=qOK?(sOK?" pp-exact":" pp-ok"):" pp-no";
   }
   return '<span class="ppred'+cls+'" title="predicția mea">pred. '+p.s1+'–'+p.s2+' · '+predName(p.q)+'</span>';
+}
+/* chip de predicție pentru cardurile din Tablou: fără nume de țară (steagurile dau ordinea), defalcare 90'/ET/pen; la d.l.d. arătăm calificata (scorul fiind egal) */
+function predForKnockoutChip(m){
+  var p=_koPredFor(m);if(!p)return "";
+  var cls="";
+  if(m.status==="done"&&hasScore(m.raw)){
+    var aq=_koActualQual(m),qOK=(aq&&aq===p.q),sOK=(+m.s1===p.s1&&+m.s2===p.s2);
+    cls=qOK?(sOK?" pp-exact":" pp-ok"):" pp-no";
+  }
+  var lbl;
+  if(p.r1!==p.r2){lbl="pred. "+p.s1+"–"+p.s2;}
+  else if(p.s1!==p.s2){lbl="pred. "+p.r1+"–"+p.r2+" · "+p.s1+"–"+p.s2+" d.p.";}
+  else{lbl="pred. "+p.r1+"–"+p.r2+" · "+predName(p.q)+" d.l.d.";}
+  return '<span class="ppred'+cls+'" title="predicția mea">'+lbl+'</span>';
 }
 function predForMatchMini(m){
   if(!m)return "";
@@ -1511,9 +1527,10 @@ function koCard(m){
     mid='<div class="kmid"><span class="ksc">'+esc(m.s1)+'–'+esc(m.s2)+'</span>'+extra+'</div>';}
   else mid='<div class="kmid"><span class="kt">'+esc(m.time||"")+'</span></div>';
   var num=(m.raw&&m.raw.num!=null)?'<span class="kmn">#'+m.raw.num+'</span>':'';
+  var pchip=predForKnockoutChip(m),pchipHTML=pchip?'<div class="kpredchip">'+pchip+'</div>':'';
   return '<div class="kcard'+(clickable?' tapp':'')+'"'+(clickable?' data-eid="'+m.raw.eid+'" role="button" tabindex="0"':'')+'>'+
     '<div class="kmeta">'+esc(roShort(m.key))+' · '+esc(m.ground||"")+num+(clickable?'<span class="tapc">'+icon("chevron-right",13)+'</span>':'')+'</div>'+
-    _koSide(m.t1,m._ak,m._win&&m._win.w)+mid+_koSide(m.t2,m._bk,m._win&&m._win.w)+'</div>';
+    _koSide(m.t1,m._ak,m._win&&m._win.w)+mid+pchipHTML+_koSide(m.t2,m._bk,m._win&&m._win.w)+'</div>';
 }
 function renderElim(){
   var data=buildKO();
@@ -1540,8 +1557,13 @@ function renderElim(){
 }
 
 /* ================= NOUTĂȚI (jurnal de versiuni) ================= */
-const APP_VER="v1.9";
+const APP_VER="v1.9.1";
 const CHANGELOG=[
+ {v:"v1.9.1",d:"29 iun 2026",t:"Predicțiile knockout, și pe cardurile din Tablou",items:[
+   ["new","În fila «Tablou», sub scorul fiecărui meci din 16-imi apare acum predicția mea, ca un indiciu discret sub steaguri (fără numele țărilor — ordinea o dau steagurile): «pred. 3–1» pentru meciuri decise în 90′, «pred. 1–1 · 1–2 d.p.» când e decis în prelungiri (90′, apoi finalul). Când e decis la lovituri de departajare scorul rămâne egal, așa că afișez și echipa calificată: «pred. 1–1 · Maroc d.l.d.»."],
+   ["new","Verdictul colorează la fel ca în «Predicții» și «Program»: verde (calificată + scor final corect), portocaliu (doar calificata corectă), roșu (calificată greșită). Penalty-urile decid doar calificata, nu colorarea scorului; 90′ e doar informativ."],
+   ["note","Predicții există momentan doar pentru 16-imi; pe optimi/sferturi/semifinale/finale indiciul pur și simplu nu apare până la un build viitor care le generează. Nu inventăm scoruri — doar mecanismul e pregătit pentru toate rundele."]
+ ]},
  {v:"v1.9",d:"28 iun 2026",t:"Fazele eliminatorii: tablou live, prelungiri/penalty-uri și predicții",items:[
    ["new","Fazele eliminatorii se populează automat din datele live ESPN: în 16-imi (și mai departe) apar echipele reale imediat ce sunt cunoscute, în locul codurilor «2A», «Înv. 74» etc. Tabloul și Programul se completează singure pe măsură ce se cunosc rezultatele."],
    ["new","Rezultatele cu prelungiri și lovituri de departajare se văd corect: scorul mare e cel final, cu eticheta «d.p.» (decis după prelungiri) sau «d.l.d.» (decis din lovituri de departajare), iar penalty-urile apar ca «1 (4) – 1 (2)»."],
